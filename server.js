@@ -1,9 +1,16 @@
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 
 const app = express()
 app.use(bodyParser.json())
 const PORT = process.env.PORT || 80;
+
+
+const db = require('./db.config.js')
+db.sequelize.sync({ alter: true }).then(() => {
+	console.log('DB sync!');
+})
 
 const persons = require('./routes.js')
 
@@ -45,35 +52,6 @@ app.get("/persons/:id", function(req, res){
         //Найдена
         res.send(person);
     });        
-});
-
-//Cоздание новой записи о человеке
-app.post("/persons", jsonParser, function(req, res){
-
-	//Проверка на наличие данных
-	if(Object.keys(req.body).length == 0) return res.status(400).json({"message":"No data"});
-
-	//Проверка на соответствие формату данных которые пытаются добавить
-	if(checkData(req.body))	return res.status(400).json({"message": "Data format error"});
-
-    const collection = req.app.locals.collection;
-	const person = {
-		_id: getNextSequence("personid"),
-		name: req.body.name, 
-		age: req.body.age, 
-		address: req.body.address, 
-		work: req.body.work
-	};
-   	console.log('POST person ', person._id);
-
-   	collection.insertOne(person, function(err, result){
-       	//Ошибка выполнения
-       	if(err) return res.sendStatus(500);
-
-       	//Данные добавлены
-       	res.header('Location', 'https://rsoi-person-service.herokuapp.com/persons/' + result.ops[0]._id);
-       	res.sendStatus(201);
-    });
 });
 
 //Обновление существующей записи о человеке
