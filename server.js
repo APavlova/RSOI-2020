@@ -3,14 +3,15 @@ const bodyParser = require('body-parser')
 
 const app = express()
 app.use(bodyParser.json())
+const PORT = process.env.PORT || 80;
 
 const persons = require('./routes.js')
 
 app.post('/persons', persons.create)
 
-const server = app.listen(8080, function() { 
+const server = app.listen(PORT, function() {
 	let host = server.address().address
-	let port = server.address().port   
+	let port = server.address().port
 	console.log("App listening at http://%s:%s", host, port)
 })
 
@@ -127,9 +128,3 @@ app.delete("/persons/:id", function(req, res){
     });
 });
 */
-
-//Завершение работы сервера
-process.on("SIGINT", () => {
-    dbClient.close();
-    process.exit();
-});
