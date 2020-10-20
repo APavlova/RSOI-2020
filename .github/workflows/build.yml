@@ -60,3 +60,9 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           arguments: clean test -PtargetUrl=https://persons-pavlova.herokuapp.com
+
+      - name: Archive integration tests results
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-tests-result
+          path: build/reports/tests/test/index.html
