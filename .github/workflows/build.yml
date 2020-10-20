@@ -1,4 +1,4 @@
-name: Deploy
+name: Main job
 
 on:
   push:
@@ -9,23 +9,56 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install node
+        uses: actions/setup-node@v1
         with:
-            node-version: 12
-      - run: npm ci     
+          node-version: 12      
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Build
+        run: npm ci
   
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-            node-version: 12
-      - run: npm ci
-      - uses: akhileshns/heroku-deploy@v3.6.8
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.6.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "persons-pavlova"
           heroku_email: "alena.pavlova000@gmail.com"
+
+  integration_tests:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test repository
+        uses: actions/checkout@v2
+        with:
+          repository: Romanow/person-service-test
+          path: integration-tests
+          ref: master
+
+      - name: Run integration tests
+        uses: eskatos/gradle-command-action@v1
+        with:
+          build-root-directory: integration-tests
+          arguments: clean test -PtargetUrl=https://persons-pavlova.herokuapp.com
