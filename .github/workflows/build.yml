@@ -49,7 +49,6 @@ jobs:
   integration_tests:
     needs: deploy
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout test repository
         uses: actions/checkout@v2
@@ -58,9 +57,10 @@ jobs:
           ref: master
 
       - name: Run integration tests
+        continue-on-error: true
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: clean test -PtargetUrl=https://persons-pavlova.herokuapp.com
+          arguments: clean test -PtargetUrl=https://persons-pavlova.herokuapp.com        
 
       - name: Archive integration tests results
         uses: actions/upload-artifact@v2
