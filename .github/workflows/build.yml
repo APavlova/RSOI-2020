@@ -56,6 +56,11 @@ jobs:
           repository: Romanow/person-service-test
           ref: master
 
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 12
+
       - name: Run integration tests
         continue-on-error: true
         uses: eskatos/gradle-command-action@v1
@@ -66,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: integration-tests-result
-          path: build/reports/tests/test/index.html
+          path: build/reports/tests/
