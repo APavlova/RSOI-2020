@@ -75,6 +75,7 @@ jobs:
         run: npm run test
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/persons
+          PORT: 8000
 
   deploy:
     needs: test
